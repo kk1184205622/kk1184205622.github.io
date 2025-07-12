@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>一键防红生成器</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     body{margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont;background:#f7f7f7;color:#333}
     input{width:100%;padding:.6rem;font-size:1rem;border:1px solid #bbb;border-radius:4px}
@@ -20,6 +20,7 @@
     <h2>输入要被防红的 URL</h2>
     <input id="urlIn" type="url" placeholder="https://example.com" required>
     <button onclick="gen()">生成防红链接</button>
+
     <div id="box" class="result" style="display:none">
       <p>复制下方链接即可在微信/QQ 打开：</p>
       <a id="link" href="" target="_blank"></a>
@@ -28,14 +29,19 @@
 
   <script>
     /* ---------- 生成器 ---------- */
-    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
+    // 当前仓库名，必须与 GitHub 仓库保持一致
+    const repo = 'kk666';
+    const base = `${location.origin}/${repo}/`;
 
     function gen() {
       const raw = document.getElementById('urlIn').value.trim();
       if (!/^https?:\/\//i.test(raw)) { alert('请输入完整的 http/https 链接'); return; }
+
+      // Base64 URL-safe
       const code = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      const short = base + 'r/' + code;
-      document.getElementById('link').textContent = document.getElementById('link').href = short;
+      const short = `${base}r/${code}`;
+      const a = document.getElementById('link');
+      a.textContent = a.href = short;
       document.getElementById('box').style.display = 'block';
     }
 
@@ -44,8 +50,7 @@
     if (path) {
       try {
         let str = path[1].replace(/-/g, '+').replace(/_/g, '/');
-        // 补齐 base64 尾部
-        while (str.length % 4) str += '=';
+        while (str.length % 4) str += '=';          // 补齐 base64
         const url = atob(str);
         if (/^https?:\/\//i.test(url)) {
           document.body.innerHTML = '<h3 style="text-align:center;margin-top:40vh">正在跳转…</h3>';
