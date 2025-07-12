@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>一键防红生成器</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body{margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont;background:#f7f7f7;color:#333}
     input{width:100%;padding:.6rem;font-size:1rem;border:1px solid #bbb;border-radius:4px}
@@ -13,47 +13,46 @@
   </style>
 </head>
 <body>
-  <h2>输入要被防红的 URL</h2>
-  <input id="urlIn" type="url" placeholder="https://example.com" required>
-  <button onclick="gen()">生成防红链接</button>
+  <noscript>请开启 JavaScript</noscript>
 
-  <div id="box" class="result" style="display:none">
-    <p>复制下方链接即可在微信/QQ 打开：</p>
-    <a id="link" href="" target="_blank"></a>
+  <!-- 生成器区域 -->
+  <div id="gen">
+    <h2>输入要被防红的 URL</h2>
+    <input id="urlIn" type="url" placeholder="https://example.com" required>
+    <button onclick="gen()">生成防红链接</button>
+    <div id="box" class="result" style="display:none">
+      <p>复制下方链接即可在微信/QQ 打开：</p>
+      <a id="link" href="" target="_blank"></a>
+    </div>
   </div>
 
   <script>
-    /* 当前页面根地址，自动获取 */
+    /* ---------- 生成器 ---------- */
     const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
 
     function gen() {
       const raw = document.getElementById('urlIn').value.trim();
-      if (!/^https?:\/\//i.test(raw)) {
-        alert('请输入完整的 http/https 链接');
-        return;
-      }
-      /* 把目标 URL base64，再拼成 /r/xxx 形式 */
+      if (!/^https?:\/\//i.test(raw)) { alert('请输入完整的 http/https 链接'); return; }
       const code = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       const short = base + 'r/' + code;
       document.getElementById('link').textContent = document.getElementById('link').href = short;
       document.getElementById('box').style.display = 'block';
     }
-  </script>
 
-  <!-- 真正的跳转页 r/xxx -->
-  <script>
-    /* 如果当前路径是 /r/xxxxx 就自动解码并跳转 */
-    const path = location.pathname.match(/^\/r\/([A-Za-z0-9\-_]+)$/);
+    /* ---------- 跳转器 ---------- */
+    const path = location.pathname.match(/^\/kk666\/r\/([A-Za-z0-9\-_]+)$/);
     if (path) {
       try {
-        const raw = path[1].replace(/\-/g, '+').replace(/_/g, '/') + '=='.slice(0, (4 - path[1].length % 4) % 4);
-        const url = atob(raw);
+        let str = path[1].replace(/-/g, '+').replace(/_/g, '/');
+        // 补齐 base64 尾部
+        while (str.length % 4) str += '=';
+        const url = atob(str);
         if (/^https?:\/\//i.test(url)) {
-          document.write('<h3 style="text-align:center;margin-top:45vh">正在跳转…</h3>');
+          document.body.innerHTML = '<h3 style="text-align:center;margin-top:40vh">正在跳转…</h3>';
           setTimeout(() => location.replace(url), 1200);
         } else throw 1;
       } catch {
-        document.write('<h3 style="text-align:center;margin-top:45vh">链接格式错误</h3>');
+        document.body.innerHTML = '<h3 style="text-align:center;margin-top:40vh">链接格式错误</h3>';
       }
     }
   </script>
