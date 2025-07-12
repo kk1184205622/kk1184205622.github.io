@@ -1,56 +1,43 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>一键防红生成器</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body{margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont;background:#f7f7f7;color:#333}
-    input{width:100%;padding:.6rem;font-size:1rem;border:1px solid #bbb;border-radius:4px}
-    button{margin-top:.8rem;padding:.6rem 1.2rem;font-size:1rem;border:0;background:#0066ff;color:#fff;border-radius:4px;cursor:pointer}
-    .result{margin-top:1rem;padding:.8rem;background:#fff;border-left:4px solid #0066ff;word-break:break-all}
-    .result a{color:#0066ff}
-  </style>
+  <meta charset="UTF-8"/>
+  <title>防红</title>
+  <style>body{margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont;background:#f7f7f7;color:#333}</style>
 </head>
 <body>
   <noscript>请开启 JavaScript</noscript>
-
-  <div id="gen">
-    <h2>输入要被防红的 URL</h2>
-    <input id="urlIn" type="url" placeholder="https://example.com" required>
-    <button onclick="gen()">生成防红链接</button>
-
-    <div id="box" class="result" style="display:none">
-      <p>复制下方链接即可在微信/QQ 打开：</p>
-      <a id="link" href="" target="_blank"></a>
-    </div>
-  </div>
-
   <script>
-    const base = `${location.origin}/`;
-
-    function gen() {
-      const raw = document.getElementById('urlIn').value.trim();
-      if (!/^https?:\/\//i.test(raw)) { alert('请输入完整的 http/https 链接'); return; }
-      const code = btoa(raw).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      const short = `${base}r/${code}`;
-      const a = document.getElementById('link');
-      a.textContent = a.href = short;
-      document.getElementById('box').style.display = 'block';
-    }
-
-    const path = location.pathname.match(/^\/r\/([A-Za-z0-9\-_]+)$/);
-    if (path) {
-      try {
-        let str = path[1].replace(/-/g, '+').replace(/_/g, '/');
-        while (str.length % 4) str += '=';
-        const url = atob(str);
-        if (/^https?:\/\//i.test(url)) {
-          document.body.innerHTML = '<h3 style="text-align:center;margin-top:40vh">正在跳转…</h3>';
-          setTimeout(() => location.replace(url), 1200);
-        } else throw 1;
-      } catch {
-        document.body.innerHTML = '<h3 style="text-align:center;margin-top:40vh">链接格式错误</h3>';
+    /* 如果是首页，显示输入框 */
+    if (location.pathname === '/') {
+      document.body.innerHTML = `
+        <h2>输入要被防红的 URL</h2>
+        <input id="u" type="url" placeholder="https://example.com" style="width:100%;padding:.5em;font-size:1em">
+        <button onclick="g()" style="margin-top:.5em;padding:.5em 1em">生成</button>
+        <p id="o" style="word-break:break-all;margin-top:1em"></p>
+      `;
+      window.g = () => {
+        const v = document.getElementById('u').value.trim();
+        if (!/^https?:/i.test(v)) return alert('请输入完整链接');
+        const c = btoa(v).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+        const l = location.origin + '/r/' + c;
+        document.getElementById('o').innerHTML = '短链：<a href="'+l+'" target="_blank">'+l+'</a>';
+      };
+    } else {
+      /* 如果是 /r/xxxx，解码并跳转 */
+      const m = location.pathname.match(/^\/r\/([A-Za-z0-9\-_]+)$/);
+      if (m) {
+        try {
+          let s = m[1].replace(/-/g,'+').replace(/_/g,'/');
+          while (s.length % 4) s += '=';
+          const u = atob(s);
+          if (/^https?:/i.test(u)) {
+            document.write('<h3 style="text-align:center;margin-top:40vh">正在跳转…</h3>');
+            setTimeout(() => location.replace(u), 1200);
+          } else throw 1;
+        } catch {
+          document.write('<h3 style="text-align:center;margin-top:40vh">链接格式错误</h3>');
+        }
       }
     }
   </script>
